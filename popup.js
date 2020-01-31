@@ -56,14 +56,34 @@ function processAllInactive(tabs) {
 
 }
 
-function buildLink(tab) {
-
-	if ((tab.title.indexOf("gmail.com") >= 0) || (tab.url.indexOf("ltesearch.org") >= 0)) {
-		console.log("found gmail or feed digest - multi mode");
-		getAllInactiveTabs(processAllInactive);
+function handleContentScriptResult(arr)
+{
+	var resultNode;
+	var result = arr[0];
+	if (result.status) {
+		resultNode = document.createTextNode("Header info copied.");
 	}
 	else {
-		console.log("single page mode");
+		resultNode = document.createTextNode("Error: header not found.");
+	}
+	document.getElementById("result").appendChild(resultNode);
+}
+
+function getDocHeader() {
+	chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
+		var currentUrl = tabs[0].url;
+		chrome.tabs.executeScript(null, {code:"getLetterHeader(\"" + currentUrl + "\")"}, handleContentScriptResult);
+	});
+}
+
+function buildLink(tab) {
+	if ((tab.title.indexOf("gmail.com") >= 0) || (tab.url.indexOf("ltesearch.org") >= 0)) {
+		getAllInactiveTabs(processAllInactive);
+	}
+	else if (tab.title.indexOf("Google Docs") >= 0) {
+		getDocHeader();
+	}
+	else {
 		singlePage(tab);
 	}
 }

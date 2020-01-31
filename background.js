@@ -1,6 +1,11 @@
 // Copyright (c) 2016 Frederick Hewett
 
 'use strict'; 
+
+function _el(id) {
+	return document.getElementById(id);
+}
+
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         switch (request.method) {
         case 'setClipboard':
@@ -12,6 +17,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		// pass newspaper db up to pop-up
 		case 'getNewspaperDatabase':
 			sendResponse({"_papers": _LTE_PAPERS});
+			break;
+		case 'getHeader':
+			sendResponse(copyHeaderToClipboard(request));
 			break;
         default:
             console.error('Unknown method "%s"', request.method);
@@ -108,6 +116,68 @@ function setClipboardMulti(tabs) {
 	}
 	
 }
+
+function makeLinkMarkup(url)
+{
+	var container = document.createElement("div");
+	var anchor = document.createElement("a");
+	anchor.href = url;
+	anchor.innerHTML = url;
+	container.appendChild(anchor);
+	return container.innerHTML;
+}
+
+function clearHeader()
+{
+	var ids=["hdr-date", "hdr-author", "hdr-media", "hdr-resp-link", "hdr-gdoc-link"];
+	
+	for (var i=0; i < ids.length; ++i) {
+		_el(ids[i]).innerHTML = "";
+	}
+}
+
+function refNumber(dateText) 
+{
+	var ref;
+	try {
+		var d = new Date(dateText);
+		ref = "" + d.getFullYear() - 2000 + "." + d.getMonth() + "." + d.getDate() + ".";
+	}
+	catch (e) {
+		return "";
+	}
+	return  ref;
+}
+
+function copyHeaderToClipboard(meta) 
+{
+	clearHeader();
+	
+	_el("hdr-date").innerHTML = meta.date;
+	_el("hdr-ref").innerHTML = refNumber(meta.date);
+	_el("hdr-author").innerHTML = meta.author;
+	_el("hdr-sender").innerHTML = meta.submitted ? meta.author : "";
+	_el("hdr-media").innerHTML = meta.newspaper;
+	_el("hdr-resp-link").innerHTML = makeLinkMarkup(meta.responseToUrl);
+	_el("hdr-gdoc-link").innerHTML = makeLinkMarkup(meta.docUrl);
+	
+	var range = document.createRange();
+	range.setStart(_el("hdr-table"), 0);
+	range.setEnd(_el("hdr-end"), 0);
+	
+	var selObj = window.getSelection()
+	selObj.removeAllRanges();
+	selObj.addRange(range);
+	
+	if (document.execCommand('copy')) {
+		return true;
+	} else {
+		console.error('failed to get clipboard content');
+		return false;
+	}
+}
+
+
 
 var _LTE_PAPERS = null;
 function loadDoc() {
