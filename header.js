@@ -5,9 +5,7 @@
 // Copyright (c) 2020 Frederick Hewett
 "use strict"; 
 
-var COPYLINK_EXTENSION_ID = "olalhnimknmpojkgpaphbfffmbhfkbfl";
-
-function getLetterHeader(currentUrl)
+function getLetterHeader(currentUrl, extensionId)
 {
 	var lines = document.getElementsByClassName("kix-lineview-content");
 	var meta = {
@@ -45,7 +43,7 @@ function getLetterHeader(currentUrl)
 
 	}
 	if (meta.author) {
-		chrome.runtime.sendMessage(COPYLINK_EXTENSION_ID,meta);
+		chrome.runtime.sendMessage(extensionId,meta);
 		return {status: true};
 	}
 	else 

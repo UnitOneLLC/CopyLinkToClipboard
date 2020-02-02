@@ -72,7 +72,7 @@ function handleContentScriptResult(arr)
 function getDocHeader() {
 	chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
 		var currentUrl = tabs[0].url;
-		chrome.tabs.executeScript(null, {code:"getLetterHeader(\"" + currentUrl + "\")"}, handleContentScriptResult);
+		chrome.tabs.executeScript(null, {code:"getLetterHeader(\"" + currentUrl + "\", \"" + chrome.runtime.id +"\")"}, handleContentScriptResult);
 	});
 }
 
@@ -91,3 +91,5 @@ function buildLink(tab) {
 document.addEventListener("DOMContentLoaded", function() {
   getCurrentTab(buildLink);
 });
+
+ 

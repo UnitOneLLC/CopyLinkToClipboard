@@ -3,7 +3,7 @@
 
   "name": "Copy link to the clipboard",
   "description": "Useful for creating links from sources when composing rich text docs",
-  "version": "3.1.00",
+  "version": "3.1.1",
 
   "browser_action": {
     "default_icon": "chainlink16.png",
