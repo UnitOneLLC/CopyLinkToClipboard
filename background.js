@@ -141,7 +141,7 @@ function refNumber(dateText)
 	var ref;
 	try {
 		var d = new Date(dateText);
-		ref = "" + d.getFullYear() - 2000 + "." + d.getMonth() + "." + d.getDate() + ".";
+		ref = "" + d.getFullYear() - 2000 + "." + (d.getMonth()+1) + "." + d.getDate() + ".";
 	}
 	catch (e) {
 		return "";
@@ -187,7 +187,7 @@ function loadDoc() {
       _LTE_PAPERS = JSON.parse(this.responseText);
     }
   };
-  xhttp.open("GET", "http://ltesearch.org/ltesearch.php?action=getpaperdb", true);
+  xhttp.open("GET", "https://ltesearch.org/ltesearch.php?action=getpaperdb", true);
   xhttp.send();
 }
 loadDoc();
