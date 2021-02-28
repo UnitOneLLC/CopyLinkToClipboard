@@ -5,6 +5,32 @@
 // Copyright (c) 2020 Frederick Hewett
 "use strict"; 
 
+function firefoxGetLink() {
+	try {
+		var scripts=document.getElementsByTagName("script");
+		for (var i=0; i < scripts.length; ++i) {
+			var s = scripts[i];
+			var t = s.textContent;
+			let varName = "DOCS_modelChunk = ";
+			if (t.indexOf(varName) == 0) {
+				var jsText = t.substring(varName.length, t.indexOf(";")); 
+				var objs = JSON.parse(jsText);
+				for (var j = 0; j < objs.length; ++j) {
+					var obj = objs[j];
+					if (obj["sm"] && obj["sm"]["lnks_link"]) {
+						var theUrl = obj["sm"]["lnks_link"]["ulnk_url"];
+						return theUrl;
+					}
+				}
+			}
+		}
+	} catch (e) {
+		console.log("firefoxGetLink threw " + e.message);
+	}
+	return "";
+}
+
+
 function getLetterHeader(currentUrl, extensionId)
 {
 	var lines = document.getElementsByClassName("kix-lineview-content");
@@ -26,6 +52,9 @@ function getLetterHeader(currentUrl, extensionId)
 			var url = lines[i].getElementsByTagName("a");
 			if (url.length > 0) {
 				meta.responseToUrl = url[0].href;
+			}
+			else if ((url=firefoxGetLink()).length > 0) {
+				meta.responseToUrl = url;
 			}
 			else {
 				meta.responseToUrl = lineText.substring(15);

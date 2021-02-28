@@ -30,6 +30,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 function setClipboard(url, value) {
     var result = false;
+	if (url.indexOf("chrome-extension") === 0) { // For PDF extension
+		url = url.substr(url.indexOf("https://"));
+	}
     
     var paperSpan = document.getElementById("paperName")
     var anch = document.getElementById("anchor0");
