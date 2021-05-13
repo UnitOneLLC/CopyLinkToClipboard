@@ -13,7 +13,7 @@ function firefoxGetLink() {
 			var t = s.textContent;
 			let varName = "DOCS_modelChunk = ";
 			if (t.indexOf(varName) == 0) {
-				var jsText = t.substring(varName.length, t.indexOf(";")); 
+				var jsText = t.substring(varName.length, t.indexOf("];")+1); 
 				var objs = JSON.parse(jsText);
 				for (var j = 0; j < objs.length; ++j) {
 					var obj = objs[j];
