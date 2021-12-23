@@ -53,8 +53,8 @@ function setClipboard(url, value) {
     	paperSpan.removeChild( fc );
     	fc = paperSpan.firstChild;
 	}    
-
-	paperSpan.appendChild(document.createTextNode(paper))
+	if (paper)
+		paperSpan.appendChild(document.createTextNode(paper))
     
 	fc = anch.firstChild;
 	while( fc ) {
@@ -65,9 +65,13 @@ function setClipboard(url, value) {
     anch.href = url
 	anch.appendChild(tn);    
 
-    range.setStart(paperSpan, 0);
-    range.setEnd(follows, 0);
-    
+	if (paper)
+		range.setStart(paperSpan, 0);
+	else
+		range.setStart(anch, 0);
+	
+	range.setEnd(follows, 0);
+	
 	var selObj = window.getSelection()
 	selObj.removeAllRanges();
 	selObj.addRange(range);
