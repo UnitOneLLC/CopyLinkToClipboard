@@ -85,6 +85,35 @@ function setClipboard(url, value) {
     return result;
 }
 
+const READER_URL = "https://ltesearch.org/read";
+
+function convertReaderTabs(tabs) {
+	for (var i=0; i < tabs.length; ++i) {
+		var tabi = tabs[i];
+		
+		if (tabi.url.indexOf(READER_URL) == 0) {
+			var u = new URL(tabi.url);
+			var urlBegin = u.search.indexOf("u=");
+			if (urlBegin !== -1) {
+				urlBegin += 2;
+				var urlEnd = u.search.indexOf("&", urlBegin);
+				var targetUrl = "";
+				if (urlEnd != -1) {
+					targetUrl = u.search.substring(urlBegin, urlEnd);
+				}
+				else {
+					targetUrl = u.search.substring(urlBegin);
+				}
+				
+				tabi.url = targetUrl;
+			}
+		}
+	}
+}
+
+function makeReaderUrl(u) {
+	return READER_URL + "?u=" + u;
+}
 
 function setClipboardMulti(tabs) {
 	var outer = document.createElement("div");
@@ -94,11 +123,12 @@ function setClipboardMulti(tabs) {
 		return false;
 	else {
 		var sortedTabs = tabs.slice();
+		convertReaderTabs(sortedTabs);
 		sortedTabs.sort(function(a,b) {return a.title.localeCompare(b.title)});
 	
 		for (var i=0; i < sortedTabs.length; ++i) {
 			var t = sortedTabs[i];
-			var link = createLink(_LTE_PAPERS, trimTitle(t.title), t.url);
+			var link = createLink(_LTE_PAPERS, trimTitle(t.title), t.url, makeReaderUrl(t.url));
 			outer.appendChild(link);
 		}
 		document.body.appendChild(outer);
