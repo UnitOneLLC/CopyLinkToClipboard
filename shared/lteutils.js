@@ -56,14 +56,25 @@ function getGoogleDocsTab(callback) {
   });
 }
 
-function lookupPaper(_papers, url) {
-	var result = "";
+function findPaper(_papers, url) {
+	var result = null;
+	var matchedDomain = "";
 
 	for (var i in _papers) {
 		var p = _papers[i];
-		if (url.indexOf(p.domain) >= 0)
-			result = p.name;
+		if (url.indexOf(p.domain) >= 0) {
+			if (p.domain.length > matchedDomain.length) {
+				result = p;
+				matchedDomain = p.domain;
+			}
+		}
 	}
+	
+	return result;
+}
+
+function lookupPaper(_papers, url) {
+	var result = findPaper(_papers, url);
 	
 	if (!result) {
 
@@ -79,25 +90,15 @@ function lookupPaper(_papers, url) {
 			var firstChar = town.charAt(0).toUpperCase();
 			town = firstChar + town.substring(1) + " Wicked Local";
 	
-			result = town;	
+			result.name = town;	
 		}
-	}
-	
-	if (url.indexOf("/opinion") > 1) {
-		result += " (opinion)";
 	}
 	
 	return result;
 }
 
 function lookupPaperObject(_papers, url) {
-	var result = null;
-
-	for (var i in _papers) {
-		var p = _papers[i];
-		if (url.indexOf(p.domain) >= 0)
-			result = p;
-	}
+	var result = findPaper(_papers, url);
 	
 	if (!result) {
 
@@ -152,20 +153,27 @@ function trimTitle(s) {
 	return s;
 }
 
-function createLink(papers, text, url) {
+function createLink(papers, text, url, readerUrl) {
 	var root = document.createElement("div");
 	var anch = document.createElement("a");
 	var paper = lookupPaper(papers, url);
-	if (paper) {
-		paper += ": ";
-	}
-	root.appendChild(document.createTextNode(paper));
+	root.appendChild(document.createTextNode(paper.name + ": "));
 	root.appendChild(anch);
 	anch.href = url;
 	var textNode = document.createTextNode(text);
 	anch.appendChild(textNode);
 	root.setAttribute("style","font-size:14.5px");
-
+	
+	if (readerUrl) {
+		var readerAnch = document.createElement("a");
+		readerAnch.setAttribute("style", "font-weight:bold");
+		root.appendChild(document.createTextNode(" "));
+		root.appendChild(readerAnch);
+		readerAnch.href = readerUrl;
+		var readerText = document.createTextNode(" (text only)");
+		readerAnch.appendChild(readerText);
+	}
+	
 	return root;
 }
 
@@ -216,3 +224,34 @@ function clearSelect(sel) {
 	}
 }
 
+function setupClipboardResult(args) {
+	// set the date field
+	document.getElementById("date").textContent = formatDate(new Date());
+	
+	// set the author field
+	var authSpan = document.getElementById("author");
+	authSpan.textContent = args.author;
+	
+	// set the "responding to" and newspaper fields if present
+	var np = document.getElementById("newspaper");
+	var sa = document.getElementById("submit_addr");
+	var sanch = document.getElementById("submit_anchor");
+	var proto = "";
+	if (args.paper) {	
+		np.textContent = args.paper.name;
+		sa.textContent = args.paper.lteaddr;
+		if (args.paper.lteaddr.indexOf('@') != -1)
+			proto = "mailto:";
+		sanch.href = proto + args.paper.lteaddr;
+	}
+	else {
+		np.textContent = "";
+		sa.textContent = "";
+	}
+	
+	// hyperlink to article
+	var link = document.getElementById("hyper");
+	console.log("url: " + args.response_to_url)
+	link.href = args.response_to_url;
+	link.textContent = args.response_to_title;
+}
